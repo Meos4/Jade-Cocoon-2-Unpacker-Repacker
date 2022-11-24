@@ -1,8 +1,10 @@
-### Feature
+Feature
+-------
 
 Can unpack / repack CDDATA.000 files and is compatible with all known game versions.
 
-### How to Use
+How to Use
+----------
 Using the executable:
 
 * Unpacker: Expect CDDATA.000 and CDDATA.LOC to be in the same directory as the executable and extract the files to a "data" directory.
@@ -15,10 +17,12 @@ With console arguments:
 
 * Repacker arguments: [1] [Unpacked files path] [CDDATA.000 and CDDATA.LOC path].
 
-### Building
+Building
+--------
 Requirements:
 * CMake
 * C++20
 
-### Dependencies
+Dependencies
+-----------
 * [fmt](https://github.com/fmtlib/fmt)
