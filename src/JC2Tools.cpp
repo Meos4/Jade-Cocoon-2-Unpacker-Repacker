@@ -14,8 +14,7 @@ static constexpr auto
 	locHeaderSize{ 4u };
 
 static constexpr auto
-	cdData000Filename{ "CDDATA.000" }, // Pal - Ntsc-j
-	cdData000FilenameLow{ "cddata.000" }, // Ntsc-u
+	cdData000Filename{ "CDDATA.000" },
 	cdDataLocFilename{ "CDDATA.LOC" },
 	dataDirectory{ "data" };
 
@@ -33,10 +32,9 @@ namespace JC2Tools
 	{
 		const std::filesystem::path cdData000Path{ fmt::format("{}/{}", src.string(), cdData000Filename) };
 
-		if (!std::filesystem::is_regular_file(cdData000Path) &&
-			!std::filesystem::is_regular_file(fmt::format("{}/{}", src.string(), cdData000FilenameLow)))
+		if (!std::filesystem::is_regular_file(cdData000Path))
 		{
-			throw std::runtime_error{ fmt::format("Can't find \"{}\" or \"{}\" in \"{}\"", cdData000Filename, cdData000FilenameLow, src.string()) };
+			throw std::runtime_error{ fmt::format("Can't find \"{}\" in \"{}\"", cdData000Filename, src.string()) };
 		}
 
 		const std::filesystem::path cdDataLocPath{ fmt::format("{}/{}", src.string(), cdDataLocFilename) };
