@@ -31,8 +31,7 @@ int main(int argc, char** argv)
 			}
 			else if (ch == '1')
 			{
-				static constexpr auto repackedDirectory{ "Repacked" };
-				JC2Tools::repacker(currentPath, repackedDirectory);
+				JC2Tools::repacker(currentPath, "Repacked");
 			}
 		}
 		else
