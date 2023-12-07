@@ -5,7 +5,7 @@
 
 namespace CDData000
 {
-	static const std::array<const char*, 5249> filesPathId
+	static constexpr std::array<const char*, 5249> filesPathId
 	{
 		"data/public/ascii_tes_16.tm2",
 		"data/eventscript/b001.ccb",
