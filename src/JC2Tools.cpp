@@ -111,8 +111,9 @@ namespace JC2Tools
 
 		const auto cdData000FilesPath{ CDData000::filesPath(nbFiles) };
 		u64 totalFilesSize{};
+		u32 maxFileSize{};
 
-		for (const auto& filePathStr : cdData000FilesPath)
+		for (const auto filePathStr : cdData000FilesPath)
 		{
 			const std::filesystem::path filePath{ fmt::format("{}/{}", src.string(), filePathStr) };
 
@@ -121,7 +122,13 @@ namespace JC2Tools
 				throw std::runtime_error{ fmt::format("\"{}\" file is missing in \"{}\"", filePathStr, src.string()) };
 			}
 
-			totalFilesSize += std::filesystem::file_size(filePath);
+			const auto fileSize{ std::filesystem::file_size(filePath) };
+			totalFilesSize += fileSize;
+
+			if (fileSize > maxFileSize)
+			{
+				maxFileSize = static_cast<u32>(fileSize);
+			}
 		}
 
 		if (totalFilesSize > std::numeric_limits<u32>::max())
@@ -140,9 +147,12 @@ namespace JC2Tools
 		cdDataLoc.write((char*)&nbFiles, sizeof(nbFiles));
 
 		u32 sectorPosition{};
+		const auto remainderBuffer{ maxFileSize % sectorSize };
+		std::vector<char> buffer(remainderBuffer ? maxFileSize + sectorSize - remainderBuffer : maxFileSize);
+		auto* const bufferPtr{ buffer.data() };
 		const std::filesystem::path binExtension{ ".bin" };
 
-		for (const auto& filePathStr : cdData000FilesPath)
+		for (const auto filePathStr : cdData000FilesPath)
 		{
 			const std::filesystem::path filePath{ fmt::format("{}/{}", src.string(), filePathStr) };
 			const auto fileSize{ static_cast<u32>(std::filesystem::file_size(filePath)) };
@@ -154,15 +164,21 @@ namespace JC2Tools
 				.isABin = static_cast<s32>(filePath.extension() == binExtension)
 			};
 
-			const auto rest{ fileSize % sectorSize };
-			std::vector<char> buffer(rest ? fileSize + sectorSize - rest : fileSize);
-			std::ifstream file{ filePath, std::ifstream::binary };
+			const auto remainder{ fileSize % sectorSize };
+			auto fileSizeSector{ fileSize };
+			if (remainder)
+			{
+				const auto padding{ sectorSize - remainder };
+				fileSizeSector += padding;
+				std::memset(bufferPtr + fileSize, 0, padding);
+			}
 
-			file.read(buffer.data(), fileSize);
-			cdData000.write(buffer.data(), buffer.size());
+			std::ifstream file{ filePath, std::ifstream::binary };
+			file.read(bufferPtr, fileSize);
+			cdData000.write(bufferPtr, fileSizeSector);
 			cdDataLoc.write((char*)&fileInfo, sizeof(fileInfo));
 
-			sectorPosition += static_cast<u32>(buffer.size()) / sectorSize;
+			sectorPosition += fileSizeSector / sectorSize;
 		}
 
 		fmt::print("Done\n");
