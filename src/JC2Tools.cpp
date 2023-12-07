@@ -1,13 +1,15 @@
 #include "JC2Tools.hpp"
+
 #include "CDData000.hpp"
 #include "Types.hpp"
 
 #include "fmt/format.h"
 
-#include <stdexcept>
-#include <vector>
+#include <cstring>
 #include <fstream>
 #include <limits>
+#include <stdexcept>
+#include <vector>
 
 namespace JC2Tools
 {
