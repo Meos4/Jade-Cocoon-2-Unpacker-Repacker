@@ -24,7 +24,7 @@ struct CdDataLocFileInfo
 	u32 position;
 	u32 size;
 	u32 nbSectors;
-	u32 unknown;
+	s32 isABin;
 };
 
 namespace JC2Tools
@@ -133,6 +133,7 @@ namespace JC2Tools
 		cdDataLoc.write((char*)&nbFiles, sizeof(nbFiles));
 
 		u32 sectorPosition{};
+		const std::filesystem::path binExtension{ ".bin" };
 
 		for (const auto& filePathStr : cdData000FilesPath)
 		{
@@ -143,7 +144,7 @@ namespace JC2Tools
 				.position = sectorPosition,
 				.size = fileSize,
 				.nbSectors = (fileSize + sectorSize - 1) >> 0xB,
-				.unknown = 0
+				.isABin = static_cast<s32>(filePath.extension() == binExtension)
 			};
 
 			const auto rest{ fileSize % sectorSize };
