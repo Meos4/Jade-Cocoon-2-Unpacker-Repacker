@@ -41,7 +41,7 @@ namespace JC2Tools
 
 		if (!std::filesystem::is_regular_file(cdDataLocPath))
 		{
-			throw std::runtime_error{ fmt::format("Can't find \"{}\" in \"{}\"", cdDataLocPath.filename().string(), cdDataLocPath.parent_path().string()) };
+			throw std::runtime_error{ fmt::format("Can't find \"{}\" in \"{}\"", cdDataLocFilename, src.string()) };
 		}
 
 		std::ifstream
@@ -53,7 +53,7 @@ namespace JC2Tools
 
 		if (std::filesystem::file_size(cdDataLocPath) != nbFiles * sizeof(CdDataLocFileInfo) + locHeaderSize)
 		{
-			throw std::runtime_error{ fmt::format("\"{}\" is invalid", cdDataLocPath.filename().string()) };
+			throw std::runtime_error{ fmt::format("\"{}\" is invalid", cdDataLocFilename) };
 		}
 
 		std::filesystem::create_directories(dest);
@@ -87,7 +87,7 @@ namespace JC2Tools
 
 		if (!std::filesystem::is_directory(dataPath))
 		{
-			throw std::runtime_error{ fmt::format("Can't find \"{}\" directory in \"{}\"", dataPath.filename().string(), dataPath.parent_path().string()) };
+			throw std::runtime_error{ fmt::format("Can't find \"{}\" directory in \"{}\"", dataDirectory, src.string()) };
 		}
 
 		u32 nbFiles{};
@@ -109,7 +109,7 @@ namespace JC2Tools
 
 			if (!std::filesystem::is_regular_file(filePath))
 			{
-				throw std::runtime_error{ fmt::format("\"{}\" file is missing in \"{}\"", filePath.filename().string(), filePath.parent_path().string()) };
+				throw std::runtime_error{ fmt::format("\"{}\" file is missing in \"{}\"", filePathStr, src.string()) };
 			}
 
 			totalFilesSize += std::filesystem::file_size(filePath);
