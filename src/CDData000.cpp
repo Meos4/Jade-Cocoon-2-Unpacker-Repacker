@@ -5269,7 +5269,7 @@ namespace CDData000
 			vFilesPath.erase(vFilesPath.begin() + 975);
 			vFilesPath.erase(vFilesPath.begin() + 4630);
 		}
-		else if (nbFiles != vFilesPath.size())
+		else if (nbFiles != CDData000::filesPathId.size())
 		{
 			throw std::runtime_error{ "Invalid number of files" };
 		}
