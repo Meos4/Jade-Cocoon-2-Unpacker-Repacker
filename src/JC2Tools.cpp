@@ -9,25 +9,25 @@
 #include <fstream>
 #include <limits>
 
-static constexpr auto
-	sectorSize{ 2048u },
-	locHeaderSize{ 4u };
-
-static constexpr auto
-	cdData000Filename{ "CDDATA.000" },
-	cdDataLocFilename{ "CDDATA.LOC" },
-	dataDirectory{ "data" };
-
-struct CdDataLocFileInfo
-{
-	u32 position;
-	u32 size;
-	u32 nbSectors;
-	s32 isABin;
-};
-
 namespace JC2Tools
 {
+	static constexpr auto
+		sectorSize{ 2048u },
+		locHeaderSize{ 4u };
+
+	static constexpr auto
+		cdData000Filename{ "CDDATA.000" },
+		cdDataLocFilename{ "CDDATA.LOC" },
+		dataDirectory{ "data" };
+
+	struct CdDataLocFileInfo
+	{
+		u32 position;
+		u32 size;
+		u32 nbSectors;
+		s32 isABin;
+	};
+
 	void unpacker(const std::filesystem::path& src, const std::filesystem::path& dest)
 	{
 		const std::filesystem::path cdData000Path{ fmt::format("{}/{}", src.string(), cdData000Filename) };
