@@ -50,32 +50,41 @@ namespace JC2Tools
 
 		u32 nbFiles;
 		cdDataLoc.read((char*)&nbFiles, sizeof(nbFiles));
+		const auto locFileInfoSize{ nbFiles * sizeof(CdDataLocFileInfo) };
 
-		if (std::filesystem::file_size(cdDataLocPath) != nbFiles * sizeof(CdDataLocFileInfo) + locHeaderSize)
+		if (std::filesystem::file_size(cdDataLocPath) != locFileInfoSize + locHeaderSize)
 		{
 			throw std::runtime_error{ fmt::format("\"{}\" is invalid", cdDataLocFilename) };
 		}
+
+		std::vector<CdDataLocFileInfo> filesInfo(nbFiles);
+		cdDataLoc.read((char*)filesInfo.data(), locFileInfoSize);
+
+		const auto maxFileSizeElem{ std::max_element(filesInfo.begin(), filesInfo.end(),
+			[](const CdDataLocFileInfo& a, const CdDataLocFileInfo& b)
+			{
+				return a.size < b.size;
+			})};
 
 		std::filesystem::create_directories(dest);
 
 		fmt::print("Unpacking files...\n");
 
 		const auto cdData000FilesPath{ CDData000::filesPath(nbFiles) };
+		std::vector<char> buffer(maxFileSizeElem->size);
+		auto* const bufferPtr{ buffer.data() };
 
-		for (const auto& filePathStr : cdData000FilesPath)
+		for (u32 i{}; i < nbFiles; ++i)
 		{
-			const std::filesystem::path filePath{ fmt::format("{}/{}", dest.string(), filePathStr) };
+			const std::filesystem::path filePath{ fmt::format("{}/{}", dest.string(), cdData000FilesPath[i]) };
+			const auto fileSize{ filesInfo[i].size };
 			std::filesystem::create_directories(filePath.parent_path());
 
-			CdDataLocFileInfo fileInfo;
-			cdDataLoc.read((char*)&fileInfo, sizeof(fileInfo));
-
-			std::vector<char> buffer(fileInfo.size);
-			cdData000.seekg(fileInfo.position * sectorSize);
-			cdData000.read(buffer.data(), fileInfo.size);
+			cdData000.seekg(filesInfo[i].position * sectorSize);
+			cdData000.read(bufferPtr, fileSize);
 
 			std::ofstream file{ filePath, std::ofstream::binary };
-			file.write((const char*)buffer.data(), buffer.size());
+			file.write(bufferPtr, fileSize);
 		}
 
 		fmt::print("{} Files unpacked\n", cdData000FilesPath.size());
