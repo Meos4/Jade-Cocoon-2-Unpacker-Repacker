@@ -30,6 +30,12 @@ namespace JC2Tools
 		s32 isABin;
 	};
 
+	struct PathSize
+	{
+		std::filesystem::path path;
+		std::size_t size;
+	};
+
 	void unpacker(const std::filesystem::path& src, const std::filesystem::path& dest)
 	{
 		const std::filesystem::path cdData000Path{ fmt::format("{}/{}", src.string(), cdData000Filename) };
@@ -112,24 +118,21 @@ namespace JC2Tools
 		}
 
 		const auto cdData000FilesPath{ CDData000::filesPath(nbFiles) };
-		u64 totalFilesSize{};
 		u32 maxFileSize{};
+		u64 totalFilesSize{};
 
-		for (const auto filePathStr : cdData000FilesPath)
+		std::vector<PathSize> filesPathSize(nbFiles);
+
+		for (u32 i{}; i < nbFiles; ++i)
 		{
-			const std::filesystem::path filePath{ fmt::format("{}/{}", src.string(), filePathStr) };
+			auto* const file{ &filesPathSize[i] };
+			file->path = fmt::format("{}/{}", src.string(), cdData000FilesPath[i]);
+			file->size = std::filesystem::file_size(file->path);
 
-			if (!std::filesystem::is_regular_file(filePath))
+			totalFilesSize += file->size;
+			if (file->size > maxFileSize)
 			{
-				throw std::runtime_error{ fmt::format("\"{}\" file is missing in \"{}\"", filePathStr, src.string()) };
-			}
-
-			const auto fileSize{ std::filesystem::file_size(filePath) };
-			totalFilesSize += fileSize;
-
-			if (fileSize > maxFileSize)
-			{
-				maxFileSize = static_cast<u32>(fileSize);
+				maxFileSize = static_cast<u32>(file->size);
 			}
 		}
 
@@ -154,29 +157,27 @@ namespace JC2Tools
 		auto* const bufferPtr{ buffer.data() };
 		const std::filesystem::path binExtension{ ".bin" };
 
-		for (const auto filePathStr : cdData000FilesPath)
+		for (const auto& [path, size] : filesPathSize)
 		{
-			const std::filesystem::path filePath{ fmt::format("{}/{}", src.string(), filePathStr) };
-			const auto fileSize{ static_cast<u32>(std::filesystem::file_size(filePath)) };
 			const CdDataLocFileInfo fileInfo
 			{
 				.position = sectorPosition,
-				.size = fileSize,
-				.nbSectors = (fileSize + sectorSize - 1) >> 0xB,
-				.isABin = static_cast<s32>(filePath.extension() == binExtension)
+				.size = static_cast<u32>(size),
+				.nbSectors = (static_cast<u32>(size) + sectorSize - 1) >> 0xB,
+				.isABin = static_cast<s32>(path.extension() == binExtension)
 			};
 
-			const auto remainder{ fileSize % sectorSize };
-			auto fileSizeSector{ fileSize };
+			const auto remainder{ static_cast<u32>(size) % sectorSize };
+			auto fileSizeSector{ static_cast<u32>(size) };
 			if (remainder)
 			{
 				const auto padding{ sectorSize - remainder };
 				fileSizeSector += padding;
-				std::memset(bufferPtr + fileSize, 0, padding);
+				std::memset(bufferPtr + size, 0, padding);
 			}
 
-			std::ifstream file{ filePath, std::ifstream::binary };
-			file.read(bufferPtr, fileSize);
+			std::ifstream file{ path, std::ifstream::binary };
+			file.read(bufferPtr, size);
 			cdData000.write(bufferPtr, fileSizeSector);
 			cdDataLoc.write((char*)&fileInfo, sizeof(fileInfo));
 
