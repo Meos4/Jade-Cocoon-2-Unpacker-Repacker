@@ -4,7 +4,7 @@ Can unpack / repack CDDATA.000 files and is compatible with all known game versi
 
 Download
 --------
-[Romhacking](https://www.romhacking.net/utilities/1715)
+[GitHub](https://github.com/Meos4/Jade-Cocoon-2-Unpacker-Repacker/releases)
 
 How to Use
 ----------
