@@ -2,10 +2,6 @@ Feature
 -------
 Can unpack / repack CDDATA.000 files and is compatible with all known game versions.
 
-Download
---------
-[GitHub](https://github.com/Meos4/Jade-Cocoon-2-Unpacker-Repacker/releases)
-
 How to Use
 ----------
 Using the executable:
@@ -25,7 +21,3 @@ Building
 Requirements:
 * CMake
 * C++20
-
-Dependencies
------------
-* [fmt](https://github.com/fmtlib/fmt)
